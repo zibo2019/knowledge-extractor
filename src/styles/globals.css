@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'JingHuaSongTi';
+  /* 使用相对路径从 src 目录引入字体文件 */
+  src: url('../assets/fonts/京華老宋体2.002.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 使用示例 */
+.use-custom-font {
+  font-family: 'JingHuaSongTi', sans-serif;
+} 

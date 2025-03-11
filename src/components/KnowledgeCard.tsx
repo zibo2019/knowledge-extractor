@@ -252,7 +252,7 @@ export const KnowledgeCard: React.FC<Props> = ({
 
   // 自定义字体样式
   const customFontStyle = {
-    fontFamily: '"京華老宋体", "SimSun", serif',
+    fontFamily: '"JingHuaSongTi", "SimSun", serif',
   } as const;
 
   return (
