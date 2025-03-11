@@ -59,6 +59,7 @@ function App() {
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold">{t('appTitle')}</h1>
               <div className="flex items-center gap-2">
+                <ApiConfig />
                 <LanguageSwitcher />
                 <Button
                   variant="ghost"
@@ -77,12 +78,9 @@ function App() {
         </header>
 
         <main className="container mx-auto px-4 py-8 space-y-8">
-          <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <TextInput onSubmit={handleTextSubmit} />
-            </div>
+          <div className="grid gap-8 grid-cols-1 lg:grid-cols-1">
             <div>
-              <ApiConfig />
+              <TextInput onSubmit={handleTextSubmit} />
             </div>
           </div>
 

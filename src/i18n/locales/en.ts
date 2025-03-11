@@ -24,7 +24,11 @@ const enTranslation = {
     testing: 'Testing connection...',
     testSuccess: 'Connection successful!',
     testFailed: 'Connection failed',
-    unknownError: 'Unknown error'
+    unknownError: 'Unknown error',
+    configButton: 'API Config',
+    apiKeyHint: 'Enter your OpenAI API key',
+    baseUrlHint: 'Default is the official OpenAI API URL',
+    timeoutHint: 'Request timeout in milliseconds, default is 30000ms'
   },
   
   // 卡片列表组件

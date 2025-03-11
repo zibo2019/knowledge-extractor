@@ -24,7 +24,11 @@ const zhTranslation = {
     testing: '正在测试连接...',
     testSuccess: '连接成功！',
     testFailed: '连接失败',
-    unknownError: '未知错误'
+    unknownError: '未知错误',
+    configButton: 'API 配置',
+    apiKeyHint: '输入您的 OpenAI API 密钥',
+    baseUrlHint: '默认为 OpenAI 官方 API 地址',
+    timeoutHint: '请求超时时间，默认为 30000 毫秒'
   },
   
   // 卡片列表组件
