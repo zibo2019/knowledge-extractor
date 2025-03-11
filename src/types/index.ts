@@ -5,6 +5,7 @@ export interface KnowledgeCard {
   tags: string[];
   importance: number;
   createdAt: Date;
+  originalTitle?: string;
 }
 
 export interface APIConfig {
@@ -25,4 +26,7 @@ export interface AppState {
   updateApiConfig: (config: Partial<APIConfig>) => void;
   isConnected: boolean;
   setConnected: (status: boolean) => void;
+  showNumbering: boolean;
+  toggleNumbering: () => void;
+  updateCardTitles: () => void;
 }

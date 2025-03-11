@@ -11,7 +11,7 @@ import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { generateKnowledgeCard } from './lib/api';
 
 function App() {
-  const { darkMode, toggleDarkMode, addCard, apiConfig, isConnected } = useStore();
+  const { darkMode, toggleDarkMode, addCard, apiConfig, isConnected, showNumbering } = useStore();
   const { t } = useTranslation();
 
   const handleTextSubmit = async (text: string, cardCount: number) => {
@@ -28,12 +28,19 @@ function App() {
       // 调用 OpenAI API 生成知识卡片
       const cardsData = await generateKnowledgeCard(text, apiConfig, cardCount);
       
-      // 添加所有生成的卡片
-      cardsData.forEach(cardData => {
+      // 添加所有生成的卡片，根据全局状态决定是否添加序号
+      cardsData.forEach((cardData, index) => {
+        // 保存原始标题
+        const originalTitle = cardData.title;
+        
+        // 根据showNumbering状态决定是否显示序号
+        const title = showNumbering ? `${index + 1}. ${originalTitle}` : originalTitle;
+        
         // 创建新卡片
         const newCard = {
           id: crypto.randomUUID(),
-          title: cardData.title,
+          title: title,
+          originalTitle: originalTitle, // 保存原始标题
           content: cardData.content,
           tags: cardData.tags,
           importance: cardData.importance,

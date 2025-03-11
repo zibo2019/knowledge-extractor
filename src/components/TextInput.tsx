@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
+import { useStore } from '../store';
 
 interface TextInputProps {
   onSubmit: (text: string, cardCount: number) => void;
@@ -12,6 +13,7 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
   const [cardCount, setCardCount] = useState(1);
   const maxChars = 5000;
   const { t } = useTranslation();
+  const { showNumbering, toggleNumbering } = useStore();
 
   const handleSubmit = () => {
     if (text.trim()) {
@@ -50,7 +52,20 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
           />
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex items-center">
+          <input
+            id="addNumbering"
+            type="checkbox"
+            checked={showNumbering}
+            onChange={toggleNumbering}
+            className="mr-2 h-4 w-4"
+          />
+          <label htmlFor="addNumbering" className="text-sm font-medium">
+            {t('textInput.addNumbering', '添加序号 (1. 2. 3.)')}
+          </label>
+        </div>
+        
+        <div className="flex gap-2 ml-auto">
           <Button onClick={handleSubmit}>
             {t('textInput.processButton')}
           </Button>

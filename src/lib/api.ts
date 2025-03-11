@@ -5,9 +5,10 @@ import { APIConfig } from '../types';
  * @param text 用户输入的文本
  * @param apiConfig API 配置信息
  * @param cardCount 要生成的最大知识卡片数量
+ * @param addNumbering 是否在标题前添加序号（此参数将在前端处理，不影响API调用）
  * @returns 生成的知识卡片数据数组
  */
-export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, cardCount: number = 1) {
+export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, cardCount: number = 1, addNumbering: boolean = true) {
   try {
     // 检查 API 配置是否有效
     if (!apiConfig.apiKey) {
@@ -34,7 +35,7 @@ export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, 
 
 [
   {
-    "title": "1. 知识卡片标题 (简洁但具有描述性，带上序号，不超过20个字)",
+    "title": "知识卡片标题 (简洁但具有描述性，不超过20个字)",
     "content": "内容摘要 (详细且全面，包含新闻事件的背景、关键技术或概念、主要观点、影响或结论，以及与其他新闻的关联（如有）。避免使用过于专业的术语，或对专业术语进行简要解释。字数控制在150-200字之间)",
     "tags": ["标签1", "标签2", "标签3"], // 标签应具有代表性，便于检索，最多三个。例如：技术、应用、公司、政策等。
     "importance": 数字 (1-5，表示重要性，1为最低，5为最高。评分标准：5 - 对AI领域有重大影响，可能改变行业格局；4 - 重要的新技术突破或应用；3 - 值得关注的新闻事件；2 - 一般性的行业动态；1 - 信息量较低的新闻。)

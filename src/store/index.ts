@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AppState } from '../types';
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = create<AppState>((set, get) => ({
   darkMode: false,
   toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
   cards: [],
@@ -19,4 +19,32 @@ export const useStore = create<AppState>((set) => ({
   })),
   isConnected: false,
   setConnected: (status) => set({ isConnected: status }),
+  showNumbering: true,
+  toggleNumbering: () => {
+    set((state) => ({ showNumbering: !state.showNumbering }));
+    get().updateCardTitles();
+  },
+  updateCardTitles: () => {
+    const { cards, showNumbering } = get();
+    
+    const updatedCards = cards.map((card, index) => {
+      if (!card.originalTitle) {
+        const hasNumbering = /^\d+\.\s/.test(card.title);
+        
+        if (hasNumbering) {
+          card.originalTitle = card.title.replace(/^\d+\.\s/, '');
+        } else {
+          card.originalTitle = card.title;
+        }
+      }
+      
+      const newTitle = showNumbering 
+        ? `${index + 1}. ${card.originalTitle}` 
+        : card.originalTitle;
+      
+      return { ...card, title: newTitle };
+    });
+    
+    set({ cards: updatedCards });
+  }
 }));
