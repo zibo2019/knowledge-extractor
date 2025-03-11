@@ -20,7 +20,7 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
   const handleDownload = () => {
     if (!cardRef.current) return;
 
-    const loadingToast = toast.loading('正在生成图片...');
+    const loadingToast = toast.loading(t('notifications.processing'));
     
     // 保存原始背景色
     const originalBgColor = window.getComputedStyle(cardRef.current).backgroundColor;
@@ -33,9 +33,19 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
       }
     }
     
+    // 临时隐藏卡片外部的按钮区域，确保只捕获卡片本身
+    const parentElement = cardRef.current.parentElement;
+    const buttonContainer = parentElement?.querySelector('.card-buttons');
+    let originalButtonDisplay = 'flex';
+    
+    if (buttonContainer) {
+      originalButtonDisplay = window.getComputedStyle(buttonContainer).display;
+      (buttonContainer as HTMLElement).style.display = 'none';
+    }
+    
     domtoimage.toPng(cardRef.current, {
-      width: 1080,
-      height: 1440,
+      width: cardRef.current.offsetWidth * 3,
+      height: cardRef.current.offsetHeight * 3,
       style: {
         transform: 'scale(3)',
         transformOrigin: 'top left',
@@ -58,6 +68,11 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
         cardRef.current.style.backgroundColor = originalBgColor;
       }
       
+      // 恢复按钮区域的显示
+      if (buttonContainer) {
+        (buttonContainer as HTMLElement).style.display = originalButtonDisplay;
+      }
+      
       toast.dismiss(loadingToast);
       toast.success('图片已生成');
     })
@@ -69,76 +84,91 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
       if (cardRef.current) {
         cardRef.current.style.backgroundColor = originalBgColor;
       }
+      
+      // 恢复按钮区域的显示
+      if (buttonContainer) {
+        (buttonContainer as HTMLElement).style.display = originalButtonDisplay;
+      }
     });
   };
 
   return (
-    <div 
-      ref={cardRef}
-      data-card-id={card.id}
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col"
-      // 设置固定比例为3:4（宽:高）
-      style={{ aspectRatio: '3/4' }}
-    >
-      {/* 卡片内容区域 - 使用flex-grow-1让它占据所有可用空间 */}
-      <div className="flex-grow space-y-4">
-        <div className="flex justify-between items-start">
-          <h3 className="text-xl font-semibold">{card.title}</h3>
-          <div className="flex">
-            {stars.map((_, index) => (
-              <Star
-                key={index}
-                className={`w-5 h-5 ${
-                  index < card.importance
-                    ? 'text-yellow-400 fill-current'
-                    : 'text-gray-300'
-                }`}
-              />
+    <div className="flex flex-col">
+      {/* 卡片主体 */}
+      <div 
+        ref={cardRef}
+        data-card-id={card.id}
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col"
+        // 设置固定比例为3:4（宽:高）
+        style={{ aspectRatio: '3/4' }}
+      >
+        {/* 卡片内容区域 - 使用flex-grow-1让它占据所有可用空间 */}
+        <div className="flex-grow space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold">{card.title}</h3>
+          </div>
+
+          <p className="text-gray-600 dark:text-gray-300">{card.content}</p>
+        </div>
+
+        {/* 底部区域 */}
+        <div className="mt-auto">
+          {/* 标签列表 - 放在底部横线上方 */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {card.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm"
+              >
+                {tag}
+              </span>
             ))}
           </div>
-        </div>
 
-        <p className="text-gray-600 dark:text-gray-300">{card.content}</p>
-      </div>
-
-      {/* 底部区域 */}
-      <div className="mt-auto">
-        {/* 标签列表 - 放在底部横线上方 */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {card.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm"
-            >
-              {tag}
+          {/* 底部横线和日期 */}
+          <div className="flex justify-between items-center pt-4 border-t">
+            <span className="text-sm text-gray-500">
+              {new Date(card.createdAt).toLocaleDateString()}
             </span>
-          ))}
-        </div>
-
-        {/* 底部横线和按钮 */}
-        <div className="flex justify-between items-center pt-4 border-t">
-          <span className="text-sm text-gray-500">
-            {new Date(card.createdAt).toLocaleDateString()}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDownload}
-              title={t('knowledgeCard.exportButton')}
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(card.id)}
-              title={t('knowledgeCard.deleteButton')}
-            >
-              <Trash className="w-4 h-4 text-red-500" />
-            </Button>
+            {/* 星星评分移到右下角 */}
+            <div className="flex">
+              {stars.map((_, index) => (
+                <Star
+                  key={index}
+                  className={`w-5 h-5 ${
+                    index < card.importance
+                      ? 'text-yellow-400 fill-current'
+                      : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
+      </div>
+      
+      {/* 卡片外部的按钮区域 */}
+      <div className="flex justify-center gap-4 mt-2 card-buttons">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDownload}
+          title={t('knowledgeCard.exportButton')}
+          className="flex items-center gap-1"
+        >
+          <Download className="w-4 h-4" />
+          <span>{t('knowledgeCard.export')}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(card.id)}
+          title={t('knowledgeCard.deleteButton')}
+          className="flex items-center gap-1 text-red-500"
+        >
+          <Trash className="w-4 h-4" />
+          <span>{t('knowledgeCard.delete')}</span>
+        </Button>
       </div>
     </div>
   );

@@ -41,7 +41,9 @@ const zhTranslation = {
   // 知识卡片组件
   knowledgeCard: {
     exportButton: '导出',
-    deleteButton: '删除'
+    deleteButton: '删除',
+    export: '导出',
+    delete: '删除'
   },
   
   // 通知消息

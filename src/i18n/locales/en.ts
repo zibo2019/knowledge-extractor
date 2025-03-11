@@ -41,7 +41,9 @@ const enTranslation = {
   // 知识卡片组件
   knowledgeCard: {
     exportButton: 'Export',
-    deleteButton: 'Delete'
+    deleteButton: 'Delete',
+    export: 'Export',
+    delete: 'Delete'
   },
   
   // 通知消息
