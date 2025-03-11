@@ -37,11 +37,12 @@ const enTranslation = {
   
   // 卡片列表组件
   cardList: {
-    searchPlaceholder: 'Search cards...',
-    sortByDate: 'Sort by date',
-    sortByImportance: 'Sort by importance',
     exportAllImages: 'Export All Images',
-    exporting: 'Exporting...'
+    exporting: 'Exporting...',
+    selectAll: 'Select All',
+    deselectAll: 'Deselect All',
+    exportSelected: 'Export Selected Cards',
+    noCardSelected: 'Please select cards first'
   },
   
   // 知识卡片组件
@@ -50,7 +51,8 @@ const enTranslation = {
     deleteButton: 'Delete',
     export: 'Export',
     delete: 'Delete',
-    exportAll: 'Export All'
+    exportAll: 'Export All',
+    select: 'Select'
   },
   
   // 通知消息

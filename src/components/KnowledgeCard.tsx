@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Star, Download, Trash, Images } from 'lucide-react';
+import { Star, Download, Trash, Images, Check, Square } from 'lucide-react';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +12,17 @@ interface Props {
   onDelete: (id: string) => void;
   exportAllImages?: boolean;
   onExportComplete?: () => void;
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const KnowledgeCard: React.FC<Props> = ({ 
   card, 
   onDelete, 
   exportAllImages = false,
-  onExportComplete
+  onExportComplete,
+  isSelected = false,
+  onSelect
 }) => {
   const stars = Array(5).fill(0);
   const { t } = useTranslation();
@@ -255,7 +259,7 @@ export const KnowledgeCard: React.FC<Props> = ({
       <div 
         ref={cardRef}
         data-card-id={card.id}
-        className="p-6 flex flex-col"
+        className={`p-6 flex flex-col ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
         // 设置固定比例为3:4（宽:高）和网格纸张效果
         style={{ 
           aspectRatio: '3/4',
@@ -320,6 +324,22 @@ export const KnowledgeCard: React.FC<Props> = ({
       
       {/* 卡片外部的按钮区域 */}
       <div className="flex justify-center gap-4 mt-2 card-buttons">
+        {onSelect && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onSelect(card.id, !isSelected)}
+            title={t('knowledgeCard.select')}
+            className={`flex items-center gap-1 ${isSelected ? 'text-blue-500' : ''}`}
+          >
+            {isSelected ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Square className="w-4 h-4" />
+            )}
+            <span>{t('knowledgeCard.select')}</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"

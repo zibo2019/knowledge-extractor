@@ -37,11 +37,12 @@ const zhTranslation = {
   
   // 卡片列表组件
   cardList: {
-    searchPlaceholder: '搜索卡片...',
-    sortByDate: '按日期排序',
-    sortByImportance: '按重要性排序',
     exportAllImages: '导出所有图片',
-    exporting: '正在导出...'
+    exporting: '正在导出...',
+    selectAll: '全选',
+    deselectAll: '取消全选',
+    exportSelected: '导出选中卡片',
+    noCardSelected: '请先选择卡片'
   },
   
   // 知识卡片组件
@@ -50,7 +51,8 @@ const zhTranslation = {
     deleteButton: '删除',
     export: '导出',
     delete: '删除',
-    exportAll: '导出所有'
+    exportAll: '导出所有',
+    select: '选择'
   },
   
   // 通知消息
