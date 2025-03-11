@@ -22,6 +22,17 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
 
     const loadingToast = toast.loading('正在生成图片...');
     
+    // 保存原始背景色
+    const originalBgColor = window.getComputedStyle(cardRef.current).backgroundColor;
+    
+    // 确保背景色不透明
+    if (cardRef.current) {
+      // 如果背景色是透明的或rgba带透明度，设置为白色或其他不透明颜色
+      if (originalBgColor === 'transparent' || originalBgColor.includes('rgba')) {
+        cardRef.current.style.backgroundColor = 'white';
+      }
+    }
+    
     domtoimage.toPng(cardRef.current, {
       width: 1080,
       height: 1440,
@@ -30,20 +41,34 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
         transformOrigin: 'top left',
         width: `${cardRef.current.offsetWidth}px`,
         height: `${cardRef.current.offsetHeight}px`,
+        // 确保背景不透明
+        backgroundColor: 'white',
       },
+      // 设置背景色为白色
+      bgcolor: 'white',
     })
-    .then(dataUrl => {
+    .then((dataUrl: string) => {
       const link = document.createElement('a');
       link.download = `${card.title.replace(/\s+/g, '_')}_card.png`;
       link.href = dataUrl;
       link.click();
       
+      // 恢复原始背景色
+      if (cardRef.current) {
+        cardRef.current.style.backgroundColor = originalBgColor;
+      }
+      
       toast.dismiss(loadingToast);
       toast.success('图片已生成');
     })
-    .catch(err => {
+    .catch((err: Error) => {
       console.error('生成图片时出错:', err);
       toast.error('生成图片失败');
+      
+      // 恢复原始背景色
+      if (cardRef.current) {
+        cardRef.current.style.backgroundColor = originalBgColor;
+      }
     });
   };
 
