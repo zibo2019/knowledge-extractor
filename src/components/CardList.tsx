@@ -54,13 +54,14 @@ export const CardList: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredCards.map((card) => (
-          <Card
-            key={card.id}
-            card={card}
-            onDelete={removeCard}
-          />
+          <div key={card.id} className="flex">
+            <Card
+              card={card}
+              onDelete={removeCard}
+            />
+          </div>
         ))}
       </div>
     </div>
