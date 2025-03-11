@@ -10,7 +10,7 @@ export const useStore = create<AppState>((set) => ({
   apiConfig: {
     apiKey: 'sk-zsghdqf9NWMDFOrzCb5f6896C29540Fe8dAdD82b8b353957',
     baseUrl: 'https://api.vveai.com/v1',
-    timeout: 60000,
+    timeout: 600000,
     model: 'gpt-4o',
     maxTokens: 4096,
   },

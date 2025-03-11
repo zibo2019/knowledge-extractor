@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store';
 import { Settings, Wifi, WifiOff } from 'lucide-react';
 import { Button } from './ui/Button';
@@ -10,6 +10,32 @@ export const ApiConfig: React.FC = () => {
   const { apiConfig, updateApiConfig, isConnected, setConnected } = useStore();
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // 从 localStorage 加载 API 配置
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('apiConfig');
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        updateApiConfig(parsedConfig);
+      } catch (error) {
+        console.error('Failed to parse saved API config:', error);
+      }
+    }
+  }, [updateApiConfig]);
+
+  // 当 API 配置变更时，保存到 localStorage
+  useEffect(() => {
+    localStorage.setItem('apiConfig', JSON.stringify(apiConfig));
+  }, [apiConfig]);
+
+  // 组件加载时自动测试连接状态
+  useEffect(() => {
+    // 只有当 apiKey 存在时才测试连接
+    if (apiConfig.apiKey) {
+      testConnection();
+    }
+  }, []); // 仅在组件挂载时执行一次
 
   // 打开对话框
   const openDialog = () => setIsDialogOpen(true);
@@ -47,6 +73,8 @@ export const ApiConfig: React.FC = () => {
       if (response.ok) {
         setConnected(true);
         toast.success(t('apiConfig.testSuccess'));
+        // 测试成功后自动关闭对话框
+        closeDialog();
       } else {
         const errorData = await response.json();
         setConnected(false);

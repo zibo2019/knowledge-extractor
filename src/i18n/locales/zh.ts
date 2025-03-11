@@ -30,7 +30,7 @@ const zhTranslation = {
     configButton: 'API 配置',
     apiKeyHint: '输入您的 OpenAI API 密钥',
     baseUrlHint: '默认为 OpenAI 官方 API 地址',
-    timeoutHint: '请求超时时间，默认为 30000 毫秒',
+    timeoutHint: '请求超时时间，默认为 600000 毫秒',
     modelHint: '设置要使用的AI模型，例如：gpt-4o, gpt-3.5-turbo等',
     maxTokensHint: '设置生成内容的最大令牌数，较大的值可以生成更长的内容'
   },
