@@ -22,6 +22,7 @@ export interface AppState {
   cards: KnowledgeCard[];
   addCard: (card: KnowledgeCard) => void;
   removeCard: (id: string) => void;
+  updateCard: (updatedCard: KnowledgeCard) => void;
   updateCardOrder: (sourceIndex: number, destinationIndex: number) => void;
   apiConfig: APIConfig;
   updateApiConfig: (config: Partial<APIConfig>) => void;

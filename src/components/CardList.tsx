@@ -23,6 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
+import { EditCardModal } from './EditCardModal';
 
 // 可排序卡片组件的属性接口
 interface SortableCardProps {
@@ -30,10 +31,11 @@ interface SortableCardProps {
   onDelete: (id: string) => void;
   isSelected: boolean;
   onSelect: (id: string, selected: boolean) => void;
+  onEdit: (card: IKnowledgeCard) => void;
 }
 
 // 可排序的卡片组件
-const SortableCard: React.FC<SortableCardProps> = ({ card, onDelete, isSelected, onSelect }) => {
+const SortableCard: React.FC<SortableCardProps> = ({ card, onDelete, isSelected, onSelect, onEdit }) => {
   const {
     attributes,
     listeners,
@@ -63,16 +65,19 @@ const SortableCard: React.FC<SortableCardProps> = ({ card, onDelete, isSelected,
         onDelete={onDelete}
         isSelected={isSelected}
         onSelect={onSelect}
+        onEdit={onEdit}
       />
     </div>
   );
 };
 
 export const CardList: React.FC = () => {
-  const { cards, removeCard, updateCardOrder, updateCardTitles } = useStore();
+  const { cards, removeCard, updateCardOrder, updateCardTitles, updateCard } = useStore();
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
+  const [editingCard, setEditingCard] = useState<IKnowledgeCard | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // 设置拖拽传感器
   const sensors = useSensors(
@@ -240,6 +245,19 @@ export const CardList: React.FC = () => {
     setExporting(false);
   };
 
+  // 处理编辑卡片
+  const handleEditCard = (card: IKnowledgeCard) => {
+    setEditingCard(card);
+    setIsEditModalOpen(true);
+  };
+
+  // 处理保存编辑后的卡片
+  const handleSaveCard = (updatedCard: IKnowledgeCard) => {
+    updateCard(updatedCard);
+    updateCardTitles(); // 更新卡片标题中的序号
+    toast.success(t('notifications.cardUpdated', '卡片已更新'));
+  };
+
   const isAllSelected = cards.length > 0 && selectedCardIds.length === cards.length;
 
   return (
@@ -293,11 +311,20 @@ export const CardList: React.FC = () => {
                 onDelete={removeCard}
                 isSelected={selectedCardIds.includes(card.id)}
                 onSelect={handleCardSelect}
+                onEdit={handleEditCard}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+
+      {/* 编辑卡片模态框 */}
+      <EditCardModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        card={editingCard}
+        onSave={handleSaveCard}
+      />
     </div>
   );
 };

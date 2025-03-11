@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState } from '../types';
+import { AppState, KnowledgeCard } from '../types';
 
 export const useStore = create<AppState>((set, get) => ({
   darkMode: false,
@@ -7,6 +7,11 @@ export const useStore = create<AppState>((set, get) => ({
   cards: [],
   addCard: (card) => set((state) => ({ cards: [...state.cards, card] })),
   removeCard: (id) => set((state) => ({ cards: state.cards.filter(card => card.id !== id) })),
+  updateCard: (updatedCard: KnowledgeCard) => set((state) => ({
+    cards: state.cards.map(card => 
+      card.id === updatedCard.id ? updatedCard : card
+    )
+  })),
   updateCardOrder: (sourceIndex: number, destinationIndex: number) => set((state) => {
     const newCards = [...state.cards];
     const [movedCard] = newCards.splice(sourceIndex, 1);

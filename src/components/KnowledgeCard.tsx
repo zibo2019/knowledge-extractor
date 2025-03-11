@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Star, Download, Trash, Images, Check, Square, GripVertical } from 'lucide-react';
+import { Star, Download, Trash, Images, Check, Square, GripVertical, Edit } from 'lucide-react';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ interface Props {
   onExportComplete?: () => void;
   isSelected?: boolean;
   onSelect?: (id: string, selected: boolean) => void;
+  onEdit?: (card: IKnowledgeCard) => void;
 }
 
 export const KnowledgeCard: React.FC<Props> = ({ 
@@ -22,7 +23,8 @@ export const KnowledgeCard: React.FC<Props> = ({
   exportAllImages = false,
   onExportComplete,
   isSelected = false,
-  onSelect
+  onSelect,
+  onEdit
 }) => {
   const stars = Array(5).fill(0);
   const { t } = useTranslation();
@@ -355,6 +357,18 @@ export const KnowledgeCard: React.FC<Props> = ({
           <Download className="w-4 h-4" />
           <span>{t('knowledgeCard.export')}</span>
         </Button>
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(card)}
+            title={t('knowledgeCard.editButton', '编辑卡片')}
+            className="flex items-center gap-1 text-blue-500"
+          >
+            <Edit className="w-4 h-4" />
+            <span>{t('knowledgeCard.edit', '编辑')}</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"
