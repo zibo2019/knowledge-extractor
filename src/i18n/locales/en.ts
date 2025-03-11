@@ -67,7 +67,8 @@ const enTranslation = {
     exportSuccess: 'Successfully exported {{count}} card images',
     exportFailed: 'Failed to export images',
     noCardsToExport: 'No cards to export',
-    generatingZip: 'Generating zip file...'
+    generatingZip: 'Generating zip file...',
+    cardOrderUpdated: 'Card order updated successfully'
   }
 };
 

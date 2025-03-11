@@ -1,16 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, CheckSquare, Square } from 'lucide-react';
 import { KnowledgeCard as Card } from './KnowledgeCard';
 import { useStore } from '../store';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { KnowledgeCard as IKnowledgeCard } from '../types';
+
+// 可排序卡片组件的属性接口
+interface SortableCardProps {
+  card: IKnowledgeCard;
+  onDelete: (id: string) => void;
+  isSelected: boolean;
+  onSelect: (id: string, selected: boolean) => void;
+}
+
+// 可排序的卡片组件
+const SortableCard: React.FC<SortableCardProps> = ({ card, onDelete, isSelected, onSelect }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: card.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="flex"
+      {...attributes}
+      {...listeners}
+    >
+      <Card
+        card={card}
+        onDelete={onDelete}
+        isSelected={isSelected}
+        onSelect={onSelect}
+      />
+    </div>
+  );
+};
 
 export const CardList: React.FC = () => {
-  const { cards, removeCard } = useStore();
+  const { cards, removeCard, updateCardOrder, updateCardTitles } = useStore();
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
+
+  // 设置拖拽传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 需要拖动8px才会激活拖拽
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // 确保组件挂载时更新卡片标题
+  useEffect(() => {
+    updateCardTitles();
+  }, []);
 
   // 处理卡片选择
   const handleCardSelect = (id: string, selected: boolean) => {
@@ -30,6 +109,29 @@ export const CardList: React.FC = () => {
       // 否则全选
       setSelectedCardIds(cards.map(card => card.id));
     }
+  };
+
+  // 处理拖拽结束事件
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    // 如果没有目标或者拖拽到了原位置，不做任何处理
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    // 找到源和目标索引
+    const oldIndex = cards.findIndex(card => card.id === active.id);
+    const newIndex = cards.findIndex(card => card.id === over.id);
+    
+    // 调用store中的方法更新卡片顺序
+    updateCardOrder(oldIndex, newIndex);
+    
+    // 更新卡片标题中的序号
+    updateCardTitles();
+    
+    // 显示成功提示
+    toast.success(t('notifications.cardOrderUpdated'));
   };
 
   // 处理导出选中的卡片
@@ -174,18 +276,28 @@ export const CardList: React.FC = () => {
         )}
       </div>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {cards.map((card) => (
-          <div key={card.id} className="flex">
-            <Card
-              card={card}
-              onDelete={removeCard}
-              isSelected={selectedCardIds.includes(card.id)}
-              onSelect={handleCardSelect}
-            />
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext 
+          items={cards.map(card => card.id)}
+          strategy={rectSortingStrategy}
+        >
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {cards.map((card) => (
+              <SortableCard
+                key={card.id}
+                card={card}
+                onDelete={removeCard}
+                isSelected={selectedCardIds.includes(card.id)}
+                onSelect={handleCardSelect}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

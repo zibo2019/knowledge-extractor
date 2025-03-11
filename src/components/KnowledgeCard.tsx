@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Star, Download, Trash, Images, Check, Square } from 'lucide-react';
+import { Star, Download, Trash, Images, Check, Square, GripVertical } from 'lucide-react';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
@@ -255,6 +255,11 @@ export const KnowledgeCard: React.FC<Props> = ({
 
   return (
     <div className="flex flex-col">
+      {/* 拖拽提示图标 */}
+      <div className="flex justify-center mb-1 cursor-move opacity-30 hover:opacity-100 transition-opacity">
+        <GripVertical className="w-5 h-5 text-gray-500" />
+      </div>
+      
       {/* 卡片主体 */}
       <div 
         ref={cardRef}

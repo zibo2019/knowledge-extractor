@@ -7,6 +7,12 @@ export const useStore = create<AppState>((set, get) => ({
   cards: [],
   addCard: (card) => set((state) => ({ cards: [...state.cards, card] })),
   removeCard: (id) => set((state) => ({ cards: state.cards.filter(card => card.id !== id) })),
+  updateCardOrder: (sourceIndex: number, destinationIndex: number) => set((state) => {
+    const newCards = [...state.cards];
+    const [movedCard] = newCards.splice(sourceIndex, 1);
+    newCards.splice(destinationIndex, 0, movedCard);
+    return { cards: newCards };
+  }),
   apiConfig: {
     apiKey: 'sk-zsghdqf9NWMDFOrzCb5f6896C29540Fe8dAdD82b8b353957',
     baseUrl: 'https://api.vveai.com/v1',

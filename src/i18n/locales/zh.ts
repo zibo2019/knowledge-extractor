@@ -67,7 +67,8 @@ const zhTranslation = {
     exportSuccess: '成功导出 {{count}} 张卡片图片',
     exportFailed: '导出图片失败',
     noCardsToExport: '没有可导出的卡片',
-    generatingZip: '正在生成压缩文件...'
+    generatingZip: '正在生成压缩文件...',
+    cardOrderUpdated: '卡片顺序已更新'
   }
 };
 
