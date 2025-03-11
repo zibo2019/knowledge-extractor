@@ -11,6 +11,8 @@ export interface APIConfig {
   apiKey: string;
   baseUrl: string;
   timeout: number;
+  model: string;
+  maxTokens: number;
 }
 
 export interface AppState {

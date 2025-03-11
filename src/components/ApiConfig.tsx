@@ -114,6 +114,36 @@ export const ApiConfig: React.FC = () => {
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('apiConfig.timeoutHint')}</p>
       </div>
 
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          {t('apiConfig.model') || '模型'}
+        </label>
+        <input
+          type="text"
+          value={apiConfig.model}
+          onChange={(e) => updateApiConfig({ model: e.target.value })}
+          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {t('apiConfig.modelHint') || '设置要使用的AI模型，例如：gpt-4o, gpt-3.5-turbo等'}
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          {t('apiConfig.maxTokens') || '最大令牌数'}
+        </label>
+        <input
+          type="number"
+          value={apiConfig.maxTokens}
+          onChange={(e) => updateApiConfig({ maxTokens: Number(e.target.value) })}
+          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {t('apiConfig.maxTokensHint') || '设置生成内容的最大令牌数，较大的值可以生成更长的内容'}
+        </p>
+      </div>
+
       <Button
         onClick={testConnection}
         className="w-full"

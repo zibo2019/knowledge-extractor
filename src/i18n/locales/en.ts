@@ -19,6 +19,8 @@ const enTranslation = {
     apiKey: 'API Key',
     baseUrl: 'Base URL',
     timeout: 'Timeout (ms)',
+    model: 'Model',
+    maxTokens: 'Max Tokens',
     testButton: 'Test Connection',
     noApiKey: 'Please configure API key first',
     testing: 'Testing connection...',
@@ -28,7 +30,9 @@ const enTranslation = {
     configButton: 'API Config',
     apiKeyHint: 'Enter your OpenAI API key',
     baseUrlHint: 'Default is the official OpenAI API URL',
-    timeoutHint: 'Request timeout in milliseconds, default is 30000ms'
+    timeoutHint: 'Request timeout in milliseconds, default is 30000ms',
+    modelHint: 'Set the AI model to use, e.g.: gpt-4o, gpt-3.5-turbo, etc.',
+    maxTokensHint: 'Set the maximum number of tokens for generated content, larger values can generate longer content'
   },
   
   // 卡片列表组件

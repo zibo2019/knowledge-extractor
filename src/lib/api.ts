@@ -22,22 +22,25 @@ export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, 
         'Authorization': `Bearer ${apiConfig.apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o', // 可以根据需要更改模型
+        model: apiConfig.model, // 使用配置中的模型
         messages: [
           {
             role: 'system',
-            content: `你是一个知识提取助手，能够从文本中提取关键知识点并生成结构化的知识卡片。
-请以JSON格式返回结果，格式必须是一个数组，即使只有一个知识卡片也要使用数组格式：
+            content: `你是一位专业的知识提取与整理助手。你的任务是从给定的文本中提取关键知识点，并将其转化为结构化的知识卡片，以便于分享和理解。
+
+**目标：** 生成的知识卡片应包含足够的信息，使不熟悉该主题的人也能理解其主要内容。
+
+**输出格式：** 请严格遵循以下JSON格式输出，确保结果是一个数组（即使只有一个知识卡片）：
 [
   {
-    "title": "知识卡片标题",
-    "content": "内容摘要，简明扼要地总结关键信息",
-    "tags": ["标签1", "标签2", "标签3"],
-    "importance": 数字(1-5，表示重要性)
+    "title": "知识卡片标题 (简洁但具有描述性)",
+    "content": "内容摘要 (详细且全面，包含必要的背景信息、关键概念、主要观点和结论。避免过于简略，确保信息完整，便于他人理解，请简要说明，最多200字)",
+    "tags": ["标签1", "标签2", "标签3"], // 标签应具有代表性，便于检索，最多三个
+    "importance": 数字 (1-5，表示重要性，1为最低，5为最高)
   },
-  ...更多知识卡片
+  ... // 更多知识卡片
 ]
-不要返回任何其他格式或额外的解释文本，只返回JSON数组。`
+`
           },
           {
             role: 'user',
@@ -45,7 +48,7 @@ export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, 
           }
         ],
         temperature: 0.7,
-        max_tokens: 4096
+        max_tokens: apiConfig.maxTokens // 使用配置中的最大令牌数
       }),
       signal: AbortSignal.timeout(apiConfig.timeout)
     };
