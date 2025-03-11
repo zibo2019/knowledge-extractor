@@ -1,6 +1,6 @@
 const enTranslation = {
   // 应用标题
-  appTitle: 'Knowledge Card Generator',
+  appTitle: 'Information Card Generator',
   
   // 文本输入组件
   textInput: {
