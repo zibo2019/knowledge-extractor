@@ -1,6 +1,6 @@
 const zhTranslation = {
   // 应用标题
-  appTitle: '知识卡片生成器',
+  appTitle: 'AI日报知识卡片生成器',
   
   // 文本输入组件
   textInput: {

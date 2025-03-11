@@ -92,28 +92,73 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
     });
   };
 
+  // 网格纸张效果的CSS样式
+  const gridPaperStyle = {
+    backgroundImage: `
+      linear-gradient(#e9e9e9 1px, transparent 1px),
+      linear-gradient(90deg, #e9e9e9 1px, transparent 1px)
+    `,
+    backgroundSize: '20px 20px',
+    backgroundColor: '#f8f8f8',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e0e0e0',
+    position: 'relative',
+    overflow: 'hidden',
+  } as const;
+
+  // 暗黑模式下的网格纸张效果
+  const darkGridPaperStyle = {
+    backgroundImage: `
+      linear-gradient(#555555 1px, transparent 1px),
+      linear-gradient(90deg, #555555 1px, transparent 1px)
+    `,
+    backgroundSize: '20px 20px',
+    backgroundColor: '#2d3748',
+    border: '1px solid #4a5568',
+  } as const;
+
+  // 自定义字体样式
+  const customFontStyle = {
+    fontFamily: '"京華老宋体", "SimSun", serif',
+  } as const;
+
   return (
     <div className="flex flex-col">
       {/* 卡片主体 */}
       <div 
         ref={cardRef}
         data-card-id={card.id}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col"
-        // 设置固定比例为3:4（宽:高）
-        style={{ aspectRatio: '3/4' }}
+        className="p-6 flex flex-col"
+        // 设置固定比例为3:4（宽:高）和网格纸张效果
+        style={{ 
+          aspectRatio: '3/4',
+          ...gridPaperStyle,
+          ...(document.documentElement.classList.contains('dark') ? darkGridPaperStyle : {})
+        }}
       >
         {/* 卡片内容区域 - 使用flex-grow-1让它占据所有可用空间 */}
         <div className="flex-grow space-y-4">
           <div>
-            <h3 className="text-xl font-semibold">{card.title}</h3>
+            <h3 
+              className="text-xl font-semibold text-gray-800 dark:text-gray-100" 
+              style={customFontStyle}
+            >
+              {card.title}
+            </h3>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-300">{card.content}</p>
+          <p 
+            className="text-gray-700 dark:text-gray-300" 
+            style={customFontStyle}
+          >
+            {card.content}
+          </p>
         </div>
 
         {/* 底部区域 */}
         <div className="mt-auto">
-          {/* 标签列表 - 放在底部横线上方 */}
+          {/* 标签列表 */}
           <div className="flex flex-wrap gap-2 mb-4">
             {card.tags.map((tag) => (
               <span
@@ -125,12 +170,12 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
             ))}
           </div>
 
-          {/* 底部横线和日期 */}
-          <div className="flex justify-between items-center pt-4 border-t">
-            <span className="text-sm text-gray-500">
+          {/* 底部日期和评分 */}
+          <div className="flex justify-between items-center pt-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {new Date(card.createdAt).toLocaleDateString()}
             </span>
-            {/* 星星评分移到右下角 */}
+            {/* 星星评分 */}
             <div className="flex">
               {stars.map((_, index) => (
                 <Star
@@ -138,7 +183,7 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
                   className={`w-5 h-5 ${
                     index < card.importance
                       ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
+                      : 'text-gray-300 dark:text-gray-600'
                   }`}
                 />
               ))}
