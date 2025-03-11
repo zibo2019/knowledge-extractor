@@ -1,17 +1,13 @@
-import React from 'react';
-import { Moon, Sun } from 'lucide-react';
 import { TextInput } from './components/TextInput';
 import { ApiConfig } from './components/ApiConfig';
 import { CardList } from './components/CardList';
 import { useStore } from './store';
-import { Button } from './components/ui/Button';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { generateKnowledgeCard } from './lib/api';
 
 function App() {
-  const { darkMode, toggleDarkMode, addCard, apiConfig, isConnected, showNumbering } = useStore();
+  const { darkMode, addCard, apiConfig, isConnected, showNumbering } = useStore();
   const { t } = useTranslation();
 
   const handleTextSubmit = async (text: string, cardCount: number) => {
@@ -74,18 +70,6 @@ function App() {
               <h1 className="text-2xl font-bold">{t('appTitle')}</h1>
               <div className="flex items-center gap-2">
                 <ApiConfig />
-                <LanguageSwitcher />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleDarkMode}
-                >
-                  {darkMode ? (
-                    <Sun className="w-5 h-5" />
-                  ) : (
-                    <Moon className="w-5 h-5" />
-                  )}
-                </Button>
               </div>
             </div>
           </div>

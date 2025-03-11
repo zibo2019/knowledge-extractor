@@ -36,7 +36,8 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
+      {/* 移动端适配：将控制项改为垂直堆叠布局 */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex items-center">
           <label htmlFor="cardCount" className="mr-2 text-sm font-medium">
             {t('textInput.cardCount')}
@@ -65,8 +66,12 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
           </label>
         </div>
         
-        <div className="flex gap-2 ml-auto">
-          <Button onClick={handleSubmit}>
+        {/* 按钮在移动端也改为垂直堆叠 */}
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto mt-2 sm:mt-0">
+          <Button 
+            onClick={handleSubmit}
+            className="w-full sm:w-auto"
+          >
             {t('textInput.processButton')}
           </Button>
           
@@ -74,6 +79,7 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
             <Button
               variant="ghost"
               onClick={() => setText('')}
+              className="w-full sm:w-auto"
             >
               <X className="w-4 h-4 mr-2" />
               {t('textInput.clearButton')}
