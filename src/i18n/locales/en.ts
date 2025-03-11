@@ -39,7 +39,9 @@ const enTranslation = {
   cardList: {
     searchPlaceholder: 'Search cards...',
     sortByDate: 'Sort by date',
-    sortByImportance: 'Sort by importance'
+    sortByImportance: 'Sort by importance',
+    exportAllImages: 'Export All Images',
+    exporting: 'Exporting...'
   },
   
   // 知识卡片组件
@@ -47,7 +49,8 @@ const enTranslation = {
     exportButton: 'Export',
     deleteButton: 'Delete',
     export: 'Export',
-    delete: 'Delete'
+    delete: 'Delete',
+    exportAll: 'Export All'
   },
   
   // 通知消息
@@ -56,7 +59,12 @@ const enTranslation = {
     cardsCreated: '{{count}} knowledge cards created successfully!',
     processFailed: 'Failed to process text, please try again.',
     notConnected: 'API not connected, please configure and test API connection first',
-    processing: 'Processing text...'
+    processing: 'Processing text...',
+    exportingImages: 'Exporting images ({{current}}/{{total}})...',
+    exportSuccess: 'Successfully exported {{count}} card images',
+    exportFailed: 'Failed to export images',
+    noCardsToExport: 'No cards to export',
+    generatingZip: 'Generating zip file...'
   }
 };
 

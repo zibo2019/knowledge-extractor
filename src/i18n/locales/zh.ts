@@ -39,7 +39,9 @@ const zhTranslation = {
   cardList: {
     searchPlaceholder: '搜索卡片...',
     sortByDate: '按日期排序',
-    sortByImportance: '按重要性排序'
+    sortByImportance: '按重要性排序',
+    exportAllImages: '导出所有图片',
+    exporting: '正在导出...'
   },
   
   // 知识卡片组件
@@ -47,7 +49,8 @@ const zhTranslation = {
     exportButton: '导出',
     deleteButton: '删除',
     export: '导出',
-    delete: '删除'
+    delete: '删除',
+    exportAll: '导出所有'
   },
   
   // 通知消息
@@ -56,7 +59,12 @@ const zhTranslation = {
     cardsCreated: '{{count}}个知识卡片创建成功！',
     processFailed: '处理文本失败，请重试。',
     notConnected: 'API 未连接，请先配置并测试 API 连接',
-    processing: '正在处理文本...'
+    processing: '正在处理文本...',
+    exportingImages: '正在导出图片 ({{current}}/{{total}})...',
+    exportSuccess: '成功导出 {{count}} 张卡片图片',
+    exportFailed: '导出图片失败',
+    noCardsToExport: '没有可导出的卡片',
+    generatingZip: '正在生成压缩文件...'
   }
 };
 

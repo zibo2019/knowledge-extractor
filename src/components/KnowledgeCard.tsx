@@ -1,22 +1,31 @@
-import React, { useRef } from 'react';
-import { Star, Download, Trash } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Star, Download, Trash, Images } from 'lucide-react';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import domtoimage from 'dom-to-image';
+import { useStore } from '../store';
 
 interface Props {
   card: IKnowledgeCard;
   onDelete: (id: string) => void;
+  exportAllImages?: boolean;
+  onExportComplete?: () => void;
 }
 
-export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
+export const KnowledgeCard: React.FC<Props> = ({ 
+  card, 
+  onDelete, 
+  exportAllImages = false,
+  onExportComplete
+}) => {
   const stars = Array(5).fill(0);
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
+  const { cards } = useStore();
 
-  // 下载卡片为PNG图片
+  // 导出单个卡片为PNG图片
   const handleDownload = () => {
     if (!cardRef.current) return;
 
@@ -91,6 +100,123 @@ export const KnowledgeCard: React.FC<Props> = ({ card, onDelete }) => {
       }
     });
   };
+
+  // 导出所有卡片为PNG图片
+  const handleExportAllImages = async () => {
+    // 获取所有卡片元素
+    const cardElements = document.querySelectorAll('[data-card-id]');
+    
+    if (cardElements.length === 0) {
+      toast.error(t('notifications.noCardsToExport'));
+      return;
+    }
+    
+    const loadingToast = toast.loading(t('notifications.exportingImages', { current: 0, total: cardElements.length }));
+    let successCount = 0;
+    let failCount = 0;
+    
+    // 创建一个zip文件夹
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    const imgFolder = zip.folder('知识卡片');
+    
+    // 处理每个卡片
+    for (let i = 0; i < cardElements.length; i++) {
+      const element = cardElements[i] as HTMLElement;
+      const cardId = element.getAttribute('data-card-id');
+      const cardData = cards.find(c => c.id === cardId);
+      
+      if (!cardData) continue;
+      
+      // 更新加载提示
+      toast.loading(t('notifications.exportingImages', { current: i+1, total: cardElements.length }), { id: loadingToast });
+      
+      // 保存原始背景色
+      const originalBgColor = window.getComputedStyle(element).backgroundColor;
+      
+      // 确保背景色不透明
+      if (originalBgColor === 'transparent' || originalBgColor.includes('rgba')) {
+        element.style.backgroundColor = 'white';
+      }
+      
+      // 临时隐藏卡片外部的按钮区域
+      const parentElement = element.parentElement;
+      const buttonContainer = parentElement?.querySelector('.card-buttons');
+      let originalButtonDisplay = 'flex';
+      
+      if (buttonContainer) {
+        originalButtonDisplay = window.getComputedStyle(buttonContainer).display;
+        (buttonContainer as HTMLElement).style.display = 'none';
+      }
+      
+      try {
+        const dataUrl = await domtoimage.toPng(element, {
+          width: element.offsetWidth * 3,
+          height: element.offsetHeight * 3,
+          style: {
+            transform: 'scale(3)',
+            transformOrigin: 'top left',
+            width: `${element.offsetWidth}px`,
+            height: `${element.offsetHeight}px`,
+            backgroundColor: 'white',
+          },
+          bgcolor: 'white',
+        });
+        
+        // 将图片添加到zip文件
+        if (imgFolder) {
+          const base64Data = dataUrl.replace('data:image/png;base64,', '');
+          imgFolder.file(`${cardData.title.replace(/\s+/g, '_')}_card.png`, base64Data, { base64: true });
+          successCount++;
+        }
+      } catch (err) {
+        console.error('生成图片时出错:', err);
+        failCount++;
+      } finally {
+        // 恢复原始背景色
+        element.style.backgroundColor = originalBgColor;
+        
+        // 恢复按钮区域的显示
+        if (buttonContainer) {
+          (buttonContainer as HTMLElement).style.display = originalButtonDisplay;
+        }
+      }
+    }
+    
+    // 生成并下载zip文件
+    if (successCount > 0) {
+      try {
+        toast.loading(t('notifications.generatingZip'), { id: loadingToast });
+        const content = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = '知识卡片集合.zip';
+        link.click();
+        
+        toast.dismiss(loadingToast);
+        toast.success(t('notifications.exportSuccess', { count: successCount }));
+      } catch (err) {
+        console.error('生成zip文件时出错:', err);
+        toast.dismiss(loadingToast);
+        toast.error(t('notifications.exportFailed'));
+      }
+    } else {
+      toast.dismiss(loadingToast);
+      toast.error(t('notifications.exportFailed'));
+    }
+    
+    // 调用导出完成回调
+    if (onExportComplete) {
+      onExportComplete();
+    }
+  };
+
+  // 监听exportAllImages属性变化，当为true时自动导出所有图片
+  useEffect(() => {
+    if (exportAllImages) {
+      handleExportAllImages();
+    }
+  }, [exportAllImages]);
 
   // 网格纸张效果的CSS样式
   const gridPaperStyle = {
