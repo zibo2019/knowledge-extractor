@@ -8,8 +8,8 @@ export const useStore = create<AppState>((set) => ({
   addCard: (card) => set((state) => ({ cards: [...state.cards, card] })),
   removeCard: (id) => set((state) => ({ cards: state.cards.filter(card => card.id !== id) })),
   apiConfig: {
-    apiKey: '',
-    baseUrl: 'https://api.openai.com/v1',
+    apiKey: 'sk-zsghdqf9NWMDFOrzCb5f6896C29540Fe8dAdD82b8b353957',
+    baseUrl: 'https://api.vveai.com/v1',
     timeout: 30000,
   },
   updateApiConfig: (config) => set((state) => ({ 
