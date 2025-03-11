@@ -14,7 +14,7 @@ function App() {
   const { darkMode, toggleDarkMode, addCard, apiConfig, isConnected } = useStore();
   const { t } = useTranslation();
 
-  const handleTextSubmit = async (text: string) => {
+  const handleTextSubmit = async (text: string, cardCount: number) => {
     try {
       // 检查 API 连接状态
       if (!isConnected) {
@@ -26,24 +26,31 @@ function App() {
       const loadingToast = toast.loading(t('notifications.processing'));
       
       // 调用 OpenAI API 生成知识卡片
-      const cardData = await generateKnowledgeCard(text, apiConfig);
+      const cardsData = await generateKnowledgeCard(text, apiConfig, cardCount);
       
-      // 创建新卡片
-      const newCard = {
-        id: crypto.randomUUID(),
-        title: cardData.title,
-        content: cardData.content,
-        tags: cardData.tags,
-        importance: cardData.importance,
-        createdAt: new Date(),
-      };
-      
-      // 添加卡片到状态
-      addCard(newCard);
+      // 添加所有生成的卡片
+      cardsData.forEach(cardData => {
+        // 创建新卡片
+        const newCard = {
+          id: crypto.randomUUID(),
+          title: cardData.title,
+          content: cardData.content,
+          tags: cardData.tags,
+          importance: cardData.importance,
+          createdAt: new Date(),
+        };
+        
+        // 添加卡片到状态
+        addCard(newCard);
+      });
       
       // 关闭加载提示并显示成功消息
       toast.dismiss(loadingToast);
-      toast.success(t('notifications.cardCreated'));
+      toast.success(
+        cardsData.length > 1 
+          ? t('notifications.cardsCreated', { count: cardsData.length }) 
+          : t('notifications.cardCreated')
+      );
     } catch (error: Error | unknown) {
       // 显示错误消息
       const errorMessage = error instanceof Error ? error.message : t('notifications.processFailed');

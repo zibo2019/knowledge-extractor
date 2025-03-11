@@ -1,32 +1,21 @@
 import React, { useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
 
 interface TextInputProps {
-  onSubmit: (text: string) => void;
+  onSubmit: (text: string, cardCount: number) => void;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
   const [text, setText] = useState('');
+  const [cardCount, setCardCount] = useState(1);
   const maxChars = 5000;
   const { t } = useTranslation();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setText(content.slice(0, maxChars));
-      };
-      reader.readAsText(file);
-    }
-  };
-
   const handleSubmit = () => {
     if (text.trim()) {
-      onSubmit(text);
+      onSubmit(text, cardCount);
       setText('');
     }
   };
@@ -45,33 +34,37 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
         </div>
       </div>
       
-      <div className="flex gap-2">
-        <Button onClick={handleSubmit}>
-          {t('textInput.processButton')}
-        </Button>
-        
-        <label className="cursor-pointer">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center">
+          <label htmlFor="cardCount" className="mr-2 text-sm font-medium">
+            {t('textInput.cardCount')}
+          </label>
           <input
-            type="file"
-            accept=".txt"
-            onChange={handleFileUpload}
-            className="hidden"
+            id="cardCount"
+            type="number"
+            min="1"
+            max="10"
+            value={cardCount}
+            onChange={(e) => setCardCount(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+            className="w-16 p-2 border rounded-md dark:bg-gray-800 dark:text-white"
           />
-          <Button variant="outline">
-            <Upload className="w-4 h-4 mr-2" />
-            {t('textInput.uploadButton')}
-          </Button>
-        </label>
+        </div>
         
-        {text && (
-          <Button
-            variant="ghost"
-            onClick={() => setText('')}
-          >
-            <X className="w-4 h-4 mr-2" />
-            {t('textInput.clearButton')}
+        <div className="flex gap-2">
+          <Button onClick={handleSubmit}>
+            {t('textInput.processButton')}
           </Button>
-        )}
+          
+          {text && (
+            <Button
+              variant="ghost"
+              onClick={() => setText('')}
+            >
+              <X className="w-4 h-4 mr-2" />
+              {t('textInput.clearButton')}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

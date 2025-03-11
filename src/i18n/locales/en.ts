@@ -1,14 +1,14 @@
 const enTranslation = {
   // 应用标题
-  appTitle: 'Knowledge Extractor',
+  appTitle: 'Knowledge Card Generator',
   
   // 文本输入组件
   textInput: {
     placeholder: 'Enter or paste text here...',
     processButton: 'Process Text',
-    uploadButton: 'Upload File',
     clearButton: 'Clear',
-    charCount: '{{current}}/{{max}}'
+    charCount: '{{current}}/{{max}}',
+    cardCount: 'Card Count:'
   },
   
   // API配置组件
@@ -47,6 +47,7 @@ const enTranslation = {
   // 通知消息
   notifications: {
     cardCreated: 'Knowledge card created successfully!',
+    cardsCreated: '{{count}} knowledge cards created successfully!',
     processFailed: 'Failed to process text, please try again.',
     notConnected: 'API not connected, please configure and test API connection first',
     processing: 'Processing text...'

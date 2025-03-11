@@ -1,14 +1,14 @@
 const zhTranslation = {
   // 应用标题
-  appTitle: '知识提取器',
+  appTitle: '知识卡片生成器',
   
   // 文本输入组件
   textInput: {
     placeholder: '在此输入或粘贴文本...',
     processButton: '处理文本',
-    uploadButton: '上传文件',
     clearButton: '清除',
-    charCount: '{{current}}/{{max}}'
+    charCount: '{{current}}/{{max}}',
+    cardCount: '卡片数量:'
   },
   
   // API配置组件
@@ -47,6 +47,7 @@ const zhTranslation = {
   // 通知消息
   notifications: {
     cardCreated: '知识卡片创建成功！',
+    cardsCreated: '{{count}}个知识卡片创建成功！',
     processFailed: '处理文本失败，请重试。',
     notConnected: 'API 未连接，请先配置并测试 API 连接',
     processing: '正在处理文本...'
