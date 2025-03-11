@@ -19,7 +19,12 @@ const zhTranslation = {
     apiKey: 'API 密钥',
     baseUrl: '基础 URL',
     timeout: '超时时间 (毫秒)',
-    testButton: '测试连接'
+    testButton: '测试连接',
+    noApiKey: '请先配置 API 密钥',
+    testing: '正在测试连接...',
+    testSuccess: '连接成功！',
+    testFailed: '连接失败',
+    unknownError: '未知错误'
   },
   
   // 卡片列表组件
@@ -38,7 +43,9 @@ const zhTranslation = {
   // 通知消息
   notifications: {
     cardCreated: '知识卡片创建成功！',
-    processFailed: '处理文本失败，请重试。'
+    processFailed: '处理文本失败，请重试。',
+    notConnected: 'API 未连接，请先配置并测试 API 连接',
+    processing: '正在处理文本...'
   }
 };
 

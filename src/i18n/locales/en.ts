@@ -4,7 +4,7 @@ const enTranslation = {
   
   // 文本输入组件
   textInput: {
-    placeholder: 'Enter or paste your text here...',
+    placeholder: 'Enter or paste text here...',
     processButton: 'Process Text',
     uploadButton: 'Upload File',
     clearButton: 'Clear',
@@ -19,14 +19,19 @@ const enTranslation = {
     apiKey: 'API Key',
     baseUrl: 'Base URL',
     timeout: 'Timeout (ms)',
-    testButton: 'Test Connection'
+    testButton: 'Test Connection',
+    noApiKey: 'Please configure API key first',
+    testing: 'Testing connection...',
+    testSuccess: 'Connection successful!',
+    testFailed: 'Connection failed',
+    unknownError: 'Unknown error'
   },
   
   // 卡片列表组件
   cardList: {
     searchPlaceholder: 'Search cards...',
-    sortByDate: 'Sort by Date',
-    sortByImportance: 'Sort by Importance'
+    sortByDate: 'Sort by date',
+    sortByImportance: 'Sort by importance'
   },
   
   // 知识卡片组件
@@ -38,7 +43,9 @@ const enTranslation = {
   // 通知消息
   notifications: {
     cardCreated: 'Knowledge card created successfully!',
-    processFailed: 'Failed to process text. Please try again.'
+    processFailed: 'Failed to process text, please try again.',
+    notConnected: 'API not connected, please configure and test API connection first',
+    processing: 'Processing text...'
   }
 };
 

@@ -8,29 +8,46 @@ import { Button } from './components/ui/Button';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { generateKnowledgeCard } from './lib/api';
 
 function App() {
-  const { darkMode, toggleDarkMode, addCard } = useStore();
+  const { darkMode, toggleDarkMode, addCard, apiConfig, isConnected } = useStore();
   const { t } = useTranslation();
 
   const handleTextSubmit = async (text: string) => {
     try {
-      // Simulate API call to OpenAI
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 检查 API 连接状态
+      if (!isConnected) {
+        toast.error(t('notifications.notConnected'));
+        return;
+      }
       
+      // 显示加载提示
+      const loadingToast = toast.loading(t('notifications.processing'));
+      
+      // 调用 OpenAI API 生成知识卡片
+      const cardData = await generateKnowledgeCard(text, apiConfig);
+      
+      // 创建新卡片
       const newCard = {
         id: crypto.randomUUID(),
-        title: 'Sample Generated Title',
-        content: text.slice(0, 200) + '...',
-        tags: ['AI', 'Knowledge', 'Sample'],
-        importance: Math.floor(Math.random() * 5) + 1,
+        title: cardData.title,
+        content: cardData.content,
+        tags: cardData.tags,
+        importance: cardData.importance,
         createdAt: new Date(),
       };
       
+      // 添加卡片到状态
       addCard(newCard);
+      
+      // 关闭加载提示并显示成功消息
+      toast.dismiss(loadingToast);
       toast.success(t('notifications.cardCreated'));
-    } catch (error) {
-      toast.error(t('notifications.processFailed'));
+    } catch (error: Error | unknown) {
+      // 显示错误消息
+      const errorMessage = error instanceof Error ? error.message : t('notifications.processFailed');
+      toast.error(errorMessage);
     }
   };
 

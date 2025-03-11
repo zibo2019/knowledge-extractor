@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { Settings, Wifi, WifiOff } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 export const ApiConfig: React.FC = () => {
   const { apiConfig, updateApiConfig, isConnected, setConnected } = useStore();
@@ -10,11 +11,43 @@ export const ApiConfig: React.FC = () => {
 
   const testConnection = async () => {
     try {
-      // Simulate API connection test
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setConnected(true);
-    } catch {
+      // 检查 API 密钥是否已配置
+      if (!apiConfig.apiKey) {
+        toast.error(t('apiConfig.noApiKey'));
+        setConnected(false);
+        return;
+      }
+
+      // 显示加载提示
+      const loadingToast = toast.loading(t('apiConfig.testing'));
+
+      // 构建请求选项
+      const requestOptions = {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiConfig.apiKey}`
+        },
+        signal: AbortSignal.timeout(apiConfig.timeout)
+      };
+
+      // 发送请求到 OpenAI API 的模型列表接口（这是一个轻量级的 API 调用）
+      const response = await fetch(`${apiConfig.baseUrl}/models`, requestOptions);
+      
+      // 关闭加载提示
+      toast.dismiss(loadingToast);
+      
+      if (response.ok) {
+        setConnected(true);
+        toast.success(t('apiConfig.testSuccess'));
+      } else {
+        const errorData = await response.json();
+        setConnected(false);
+        toast.error(`${t('apiConfig.testFailed')}: ${errorData.error?.message || response.statusText}`);
+      }
+    } catch (error: Error | unknown) {
       setConnected(false);
+      const errorMessage = error instanceof Error ? error.message : t('apiConfig.unknownError');
+      toast.error(`${t('apiConfig.testFailed')}: ${errorMessage}`);
     }
   };
 
