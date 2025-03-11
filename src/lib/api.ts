@@ -4,7 +4,7 @@ import { APIConfig } from '../types';
  * 调用 OpenAI API 生成知识卡片
  * @param text 用户输入的文本
  * @param apiConfig API 配置信息
- * @param cardCount 要生成的知识卡片数量
+ * @param cardCount 要生成的最大知识卡片数量
  * @returns 生成的知识卡片数据数组
  */
 export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, cardCount: number = 1) {
@@ -41,11 +41,11 @@ export async function generateKnowledgeCard(text: string, apiConfig: APIConfig, 
           },
           {
             role: 'user',
-            content: `请从以下文本中提取关键知识，并生成${cardCount}个知识卡片：\n\n${text}`
+            content: `请从以下文本中提取关键知识，并最多生成${cardCount}个知识卡片：\n\n${text}`
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 4096
       }),
       signal: AbortSignal.timeout(apiConfig.timeout)
     };

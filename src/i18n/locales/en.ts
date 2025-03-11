@@ -8,7 +8,7 @@ const enTranslation = {
     processButton: 'Process Text',
     clearButton: 'Clear',
     charCount: '{{current}}/{{max}}',
-    cardCount: 'Card Count:'
+    cardCount: 'Max Card Count:'
   },
   
   // API配置组件

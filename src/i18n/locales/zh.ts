@@ -8,7 +8,7 @@ const zhTranslation = {
     processButton: '处理文本',
     clearButton: '清除',
     charCount: '{{current}}/{{max}}',
-    cardCount: '卡片数量:'
+    cardCount: '最大卡片数量:'
   },
   
   // API配置组件
