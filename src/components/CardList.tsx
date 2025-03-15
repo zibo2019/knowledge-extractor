@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, CheckSquare, Square, Trash } from 'lucide-react';
+import { Download, CheckSquare, Square, Trash, Book } from 'lucide-react';
 import { KnowledgeCard as Card } from './KnowledgeCard';
 import { useStore } from '../store';
 import { Button } from './ui/Button';
@@ -15,7 +15,6 @@ import {
   DragEndEvent
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -25,6 +24,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { EditCardModal } from './EditCardModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { CoverCard } from './CoverCard';
 
 // 可排序卡片组件的属性接口
 interface SortableCardProps {
@@ -80,6 +80,7 @@ export const CardList: React.FC = () => {
   const [editingCard, setEditingCard] = useState<IKnowledgeCard | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [showCover, setShowCover] = useState(true); // 控制是否显示封面
 
   // 设置拖拽传感器
   const sensors = useSensors(
@@ -151,7 +152,6 @@ export const CardList: React.FC = () => {
     setExporting(true);
     const loadingToast = toast.loading(t('notifications.exportingImages', { current: 0, total: selectedCardIds.length }));
     let successCount = 0;
-    let failCount = 0;
     
     // 创建一个zip文件夹
     const JSZip = (await import('jszip')).default;
@@ -210,7 +210,166 @@ export const CardList: React.FC = () => {
         }
       } catch (err) {
         console.error('生成图片时出错:', err);
-        failCount++;
+      } finally {
+        // 恢复原始背景色
+        element.style.backgroundColor = originalBgColor;
+        
+        // 恢复按钮区域的显示
+        if (buttonContainer) {
+          (buttonContainer as HTMLElement).style.display = originalButtonDisplay;
+        }
+      }
+    }
+    
+    // 生成并下载zip文件
+    if (successCount > 0) {
+      try {
+        toast.loading(t('notifications.generatingZip'), { id: loadingToast });
+        const content = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = '知识卡片集合.zip';
+        link.click();
+        
+        toast.dismiss(loadingToast);
+        toast.success(t('notifications.exportSuccess', { count: successCount }));
+      } catch (err) {
+        console.error('生成zip文件时出错:', err);
+        toast.dismiss(loadingToast);
+        toast.error(t('notifications.exportFailed'));
+      }
+    } else {
+      toast.dismiss(loadingToast);
+      toast.error(t('notifications.exportFailed'));
+    }
+    
+    setExporting(false);
+  };
+
+  // 处理导出所有卡片（包括封面）
+  const handleExportAll = async () => {
+    if (cards.length === 0 && !showCover) {
+      toast.error(t('cardList.noCardsToExport', '没有卡片可导出'));
+      return;
+    }
+
+    setExporting(true);
+    // 计算总导出数量（卡片数量 + 封面）
+    const totalExportCount = cards.length + (showCover ? 1 : 0);
+    const loadingToast = toast.loading(t('notifications.exportingImages', { current: 0, total: totalExportCount }));
+    let successCount = 0;
+    
+    // 创建一个zip文件夹
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    const imgFolder = zip.folder('知识卡片');
+    
+    // 首先导出封面（如果显示）
+    if (showCover) {
+      const coverElement = document.querySelector('[data-card-id="cover"]') as HTMLElement;
+      if (coverElement) {
+        // 更新加载提示
+        toast.loading(t('notifications.exportingImages', { current: 1, total: totalExportCount }), { id: loadingToast });
+        
+        // 保存原始背景色
+        const originalBgColor = window.getComputedStyle(coverElement).backgroundColor;
+        
+        // 临时隐藏卡片外部的按钮区域
+        const parentElement = coverElement.parentElement;
+        const buttonContainer = parentElement?.querySelector('.cover-buttons');
+        let originalButtonDisplay = 'flex';
+        
+        if (buttonContainer) {
+          originalButtonDisplay = window.getComputedStyle(buttonContainer).display;
+          (buttonContainer as HTMLElement).style.display = 'none';
+        }
+        
+        try {
+          const domtoimage = (await import('dom-to-image')).default;
+          const dataUrl = await domtoimage.toPng(coverElement, {
+            width: coverElement.offsetWidth * 3,
+            height: coverElement.offsetHeight * 3,
+            style: {
+              transform: 'scale(3)',
+              transformOrigin: 'top left',
+              width: `${coverElement.offsetWidth}px`,
+              height: `${coverElement.offsetHeight}px`,
+            },
+          });
+          
+          // 将封面图片添加到zip文件
+          if (imgFolder) {
+            const base64Data = dataUrl.replace('data:image/png;base64,', '');
+            imgFolder.file(`00_知识卡片封面.png`, base64Data, { base64: true });
+            successCount++;
+          }
+        } catch (err) {
+          console.error('生成封面图片时出错:', err);
+        } finally {
+          // 恢复原始背景色
+          coverElement.style.backgroundColor = originalBgColor;
+          
+          // 恢复按钮区域的显示
+          if (buttonContainer) {
+            (buttonContainer as HTMLElement).style.display = originalButtonDisplay;
+          }
+        }
+      }
+    }
+    
+    // 然后导出所有卡片
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const element = document.querySelector(`[data-card-id="${card.id}"]`) as HTMLElement;
+      
+      if (!element) continue;
+      
+      // 更新加载提示
+      toast.loading(t('notifications.exportingImages', { current: i + 1 + (showCover ? 1 : 0), total: totalExportCount }), { id: loadingToast });
+      
+      // 保存原始背景色
+      const originalBgColor = window.getComputedStyle(element).backgroundColor;
+      
+      // 确保背景色不透明
+      if (originalBgColor === 'transparent' || originalBgColor.includes('rgba')) {
+        element.style.backgroundColor = 'white';
+      }
+      
+      // 临时隐藏卡片外部的按钮区域
+      const parentElement = element.parentElement;
+      const buttonContainer = parentElement?.querySelector('.card-buttons');
+      let originalButtonDisplay = 'flex';
+      
+      if (buttonContainer) {
+        originalButtonDisplay = window.getComputedStyle(buttonContainer).display;
+        (buttonContainer as HTMLElement).style.display = 'none';
+      }
+      
+      try {
+        const domtoimage = (await import('dom-to-image')).default;
+        const dataUrl = await domtoimage.toPng(element, {
+          width: element.offsetWidth * 3,
+          height: element.offsetHeight * 3,
+          style: {
+            transform: 'scale(3)',
+            transformOrigin: 'top left',
+            width: `${element.offsetWidth}px`,
+            height: `${element.offsetHeight}px`,
+            backgroundColor: 'white',
+          },
+          bgcolor: 'white',
+        });
+        
+        // 将图片添加到zip文件
+        if (imgFolder) {
+          // 使用序号前缀确保排序正确
+          const filePrefix = (i + 1).toString().padStart(2, '0');
+          const base64Data = dataUrl.replace('data:image/png;base64,', '');
+          imgFolder.file(`${filePrefix}_${card.title.replace(/\s+/g, '_')}_card.png`, base64Data, { base64: true });
+          successCount++;
+        }
+      } catch (err) {
+        console.error('生成图片时出错:', err);
       } finally {
         // 恢复原始背景色
         element.style.backgroundColor = originalBgColor;
@@ -291,11 +450,41 @@ export const CardList: React.FC = () => {
     toast.success(t('notifications.deleteSuccess', { count }));
   };
 
+  // 切换封面显示状态
+  const toggleCover = () => {
+    setShowCover(prev => !prev);
+  };
+
   const isAllSelected = cards.length > 0 && selectedCardIds.length === cards.length;
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-start gap-2">
+      <div className="flex justify-start gap-2 flex-wrap">
+        {/* 封面控制按钮 */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleCover}
+          className="flex items-center gap-1"
+          title={showCover ? t('cardList.hideCover', '隐藏封面') : t('cardList.showCover', '显示封面')}
+        >
+          <Book className="w-4 h-4" />
+          <span>{showCover ? t('cardList.hideCover', '隐藏封面') : t('cardList.showCover', '显示封面')}</span>
+        </Button>
+
+        {/* 导出全部按钮 */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportAll}
+          disabled={exporting || (cards.length === 0 && !showCover)}
+          className="flex items-center gap-1"
+          title={t('cardList.exportAll', '导出全部')}
+        >
+          <Download className="w-4 h-4" />
+          <span>{exporting ? t('cardList.exporting') : t('cardList.exportAll', '导出全部')}</span>
+        </Button>
+
         {cards.length > 0 && (
           <>
             <Button
@@ -338,16 +527,27 @@ export const CardList: React.FC = () => {
         )}
       </div>
 
-      <DndContext 
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext 
-          items={cards.map(card => card.id)}
-          strategy={rectSortingStrategy}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {/* 显示封面卡片 */}
+        {showCover && (
+          <div className="flex">
+            <CoverCard 
+              title="知识卡片集" 
+              subtitle="提取关键知识，构建个人知识库"
+            />
+          </div>
+        )}
+
+        {/* 显示知识卡片列表 */}
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <SortableContext 
+            items={cards.map(card => card.id)}
+            strategy={rectSortingStrategy}
+          >
             {cards.map((card) => (
               <SortableCard
                 key={card.id}
@@ -358,9 +558,9 @@ export const CardList: React.FC = () => {
                 onEdit={handleEditCard}
               />
             ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          </SortableContext>
+        </DndContext>
+      </div>
 
       {/* 编辑卡片模态框 */}
       <EditCardModal
