@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, CheckSquare, Square } from 'lucide-react';
+import { Download, CheckSquare, Square, Trash } from 'lucide-react';
 import { KnowledgeCard as Card } from './KnowledgeCard';
 import { useStore } from '../store';
 import { Button } from './ui/Button';
@@ -24,6 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { EditCardModal } from './EditCardModal';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 // 可排序卡片组件的属性接口
 interface SortableCardProps {
@@ -78,6 +79,7 @@ export const CardList: React.FC = () => {
   const [exporting, setExporting] = useState(false);
   const [editingCard, setEditingCard] = useState<IKnowledgeCard | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // 设置拖拽传感器
   const sensors = useSensors(
@@ -258,6 +260,37 @@ export const CardList: React.FC = () => {
     toast.success(t('notifications.cardUpdated', '卡片已更新'));
   };
 
+  // 处理删除选中的卡片
+  const handleDeleteSelected = () => {
+    if (selectedCardIds.length === 0) {
+      toast.error(t('cardList.noCardSelected'));
+      return;
+    }
+
+    // 打开确认删除模态框
+    setIsDeleteModalOpen(true);
+  };
+
+  // 确认删除选中的卡片
+  const confirmDeleteSelected = () => {
+    // 保存选中卡片数量用于显示成功消息
+    const count = selectedCardIds.length;
+    
+    // 删除选中的卡片
+    selectedCardIds.forEach(id => {
+      removeCard(id);
+    });
+    
+    // 清空选中状态
+    setSelectedCardIds([]);
+    
+    // 更新卡片标题中的序号
+    updateCardTitles();
+    
+    // 显示成功提示
+    toast.success(t('notifications.deleteSuccess', { count }));
+  };
+
   const isAllSelected = cards.length > 0 && selectedCardIds.length === cards.length;
 
   return (
@@ -289,6 +322,17 @@ export const CardList: React.FC = () => {
             >
               <Download className="w-4 h-4" />
               <span>{exporting ? t('cardList.exporting') : t('cardList.exportSelected')}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDeleteSelected}
+              disabled={selectedCardIds.length === 0}
+              className="flex items-center gap-1"
+              title={t('cardList.deleteSelected')}
+            >
+              <Trash className="w-4 h-4" />
+              <span>{t('cardList.deleteSelected')}</span>
             </Button>
           </>
         )}
@@ -324,6 +368,14 @@ export const CardList: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         card={editingCard}
         onSave={handleSaveCard}
+      />
+
+      {/* 确认删除模态框 */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteSelected}
+        count={selectedCardIds.length}
       />
     </div>
   );

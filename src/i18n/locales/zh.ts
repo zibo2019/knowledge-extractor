@@ -43,6 +43,8 @@ const zhTranslation = {
     selectAll: '全选',
     deselectAll: '取消全选',
     exportSelected: '导出选中卡片',
+    deleteSelected: '删除选中卡片',
+    confirmDeleteSelected: '确定要删除选中的 {{count}} 张卡片吗？',
     noCardSelected: '请先选择卡片'
   },
   
@@ -54,6 +56,34 @@ const zhTranslation = {
     delete: '删除',
     exportAll: '导出所有',
     select: '选择'
+  },
+  
+  // 删除确认模态框
+  deleteModal: {
+    title: '确认删除',
+    warning: '此操作无法撤销，删除后数据将无法恢复。',
+    confirm: '确认删除'
+  },
+  
+  // 编辑卡片模态框
+  editCard: {
+    title: '编辑知识卡片',
+    titleLabel: '标题',
+    titlePlaceholder: '输入卡片标题',
+    contentLabel: '内容',
+    contentPlaceholder: '输入卡片内容',
+    tagsLabel: '标签',
+    tagsPlaceholder: '输入标签',
+    importanceLabel: '重要性',
+    addTag: '添加'
+  },
+  
+  // 通用
+  common: {
+    cancel: '取消',
+    save: '保存',
+    delete: '删除',
+    edit: '编辑'
   },
   
   // 通知消息
@@ -68,7 +98,9 @@ const zhTranslation = {
     exportFailed: '导出图片失败',
     noCardsToExport: '没有可导出的卡片',
     generatingZip: '正在生成压缩文件...',
-    cardOrderUpdated: '卡片顺序已更新'
+    cardOrderUpdated: '卡片顺序已更新',
+    deleteSuccess: '成功删除 {{count}} 张卡片',
+    cardUpdated: '卡片已更新'
   }
 };
 
