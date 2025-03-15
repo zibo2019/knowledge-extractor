@@ -4,10 +4,10 @@ import { CardList } from './components/CardList';
 import { useStore } from './store';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { generateKnowledgeCard } from './lib/api';
+import { generateKnowledgeCard, generateCoverInfo } from './lib/api';
 
 function App() {
-  const { darkMode, addCard, apiConfig, isConnected, showNumbering } = useStore();
+  const { darkMode, addCard, apiConfig, isConnected, showNumbering, setCoverInfo } = useStore();
   const { t } = useTranslation();
 
   const handleTextSubmit = async (text: string, cardCount: number) => {
@@ -54,10 +54,41 @@ function App() {
           ? t('notifications.cardsCreated', { count: cardsData.length }) 
           : t('notifications.cardCreated')
       );
+      
+      // 自动生成封面（异步进行，不阻塞卡片生成流程）
+      generateCoverForCards(cardsData);
+      
     } catch (error: Error | unknown) {
       // 显示错误消息
       const errorMessage = error instanceof Error ? error.message : t('notifications.processFailed');
       toast.error(errorMessage);
+    }
+  };
+  
+  // 根据生成的卡片自动生成封面
+  const generateCoverForCards = async (cardsData: any[]) => {
+    if (!isConnected || cardsData.length === 0) return;
+    
+    try {
+      // 准备卡片数据用于生成封面
+      const cards = cardsData.map(card => ({
+        title: card.title,
+        originalTitle: card.title,
+        content: card.content,
+        tags: card.tags
+      }));
+      
+      // 调用API生成封面内容
+      const coverInfo = await generateCoverInfo(cards, apiConfig);
+      
+      // 更新封面信息
+      setCoverInfo(coverInfo);
+      
+      // 显示成功提示（可选，因为卡片生成已经有提示了）
+      // toast.success(t('notifications.coverGenerated', '封面已自动生成'));
+    } catch (error) {
+      console.error('自动生成封面时出错:', error);
+      // 不显示错误提示，避免过多的提示干扰用户
     }
   };
 

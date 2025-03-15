@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, CheckSquare, Square, Trash, Book } from 'lucide-react';
+import { Download, CheckSquare, Square, Trash, Book, RefreshCw } from 'lucide-react';
 import { KnowledgeCard as Card } from './KnowledgeCard';
 import { useStore } from '../store';
 import { Button } from './ui/Button';
@@ -25,6 +25,7 @@ import { KnowledgeCard as IKnowledgeCard } from '../types';
 import { EditCardModal } from './EditCardModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { CoverCard } from './CoverCard';
+import { generateCoverInfo } from '../lib/api';
 
 // 可排序卡片组件的属性接口
 interface SortableCardProps {
@@ -72,8 +73,123 @@ const SortableCard: React.FC<SortableCardProps> = ({ card, onDelete, isSelected,
   );
 };
 
+// 封面编辑模态框组件
+interface EditCoverModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  coverInfo: {
+    title: string;
+    subtitle: string;
+    quote: string;
+  };
+  onSave: (updatedCover: { title: string; subtitle: string; quote: string }) => void;
+}
+
+const EditCoverModal: React.FC<EditCoverModalProps> = ({ isOpen, onClose, coverInfo, onSave }) => {
+  const [title, setTitle] = useState(coverInfo.title);
+  const [subtitle, setSubtitle] = useState(coverInfo.subtitle);
+  const [quote, setQuote] = useState(coverInfo.quote);
+  const { t } = useTranslation();
+
+  // 当coverInfo变化时更新状态
+  useEffect(() => {
+    setTitle(coverInfo.title);
+    setSubtitle(coverInfo.subtitle);
+    setQuote(coverInfo.quote);
+  }, [coverInfo]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({ title, subtitle, quote });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+          {t('coverModal.title', '编辑封面')}
+        </h2>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('coverModal.titleLabel', '标题')}
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                maxLength={15}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t('coverModal.titleHint', '最多15个字符，建议使用吸引人的爆款标题')} ({title.length}/15)
+              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('coverModal.subtitleLabel', '副标题')}
+              </label>
+              <input
+                type="text"
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                maxLength={25}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t('coverModal.subtitleHint', '最多25个字符')} ({subtitle.length}/25)
+              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('coverModal.quoteLabel', '引用语')}
+              </label>
+              <input
+                type="text"
+                value={quote}
+                onChange={(e) => setQuote(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                maxLength={20}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t('coverModal.quoteHint', '最多20个字符')} ({quote.length}/20)
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              {t('coverModal.cancel', '取消')}
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+            >
+              {t('coverModal.save', '保存')}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 export const CardList: React.FC = () => {
-  const { cards, removeCard, updateCardOrder, updateCardTitles, updateCard } = useStore();
+  const { cards, removeCard, updateCardOrder, updateCardTitles, updateCard, apiConfig, isConnected, coverInfo, setCoverInfo } = useStore();
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
@@ -81,6 +197,8 @@ export const CardList: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showCover, setShowCover] = useState(true); // 控制是否显示封面
+  const [generatingCover, setGeneratingCover] = useState(false);
+  const [isEditCoverModalOpen, setIsEditCoverModalOpen] = useState(false);
 
   // 设置拖拽传感器
   const sensors = useSensors(
@@ -455,6 +573,50 @@ export const CardList: React.FC = () => {
     setShowCover(prev => !prev);
   };
 
+  // 生成封面内容
+  const handleGenerateCover = async () => {
+    // 检查 API 连接状态
+    if (!isConnected) {
+      toast.error(t('notifications.notConnected', 'API未连接'));
+      return;
+    }
+
+    // 检查是否有卡片
+    if (cards.length === 0) {
+      toast.error(t('cardList.noCardsForCover', '没有卡片内容，无法生成封面'));
+      return;
+    }
+
+    setGeneratingCover(true);
+    const loadingToast = toast.loading(t('notifications.generatingCover', '正在生成封面...'));
+
+    try {
+      // 调用API生成封面内容
+      const newCoverInfo = await generateCoverInfo(cards, apiConfig);
+      setCoverInfo(newCoverInfo);
+      
+      toast.dismiss(loadingToast);
+      toast.success(t('notifications.coverGenerated', '封面已生成'));
+    } catch (error) {
+      console.error('生成封面时出错:', error);
+      toast.dismiss(loadingToast);
+      toast.error(t('notifications.coverGenerationFailed', '封面生成失败'));
+    } finally {
+      setGeneratingCover(false);
+    }
+  };
+
+  // 处理编辑封面
+  const handleEditCover = () => {
+    setIsEditCoverModalOpen(true);
+  };
+
+  // 处理保存封面信息
+  const handleSaveCoverInfo = (updatedCover: { title: string; subtitle: string; quote: string }) => {
+    setCoverInfo(updatedCover);
+    toast.success(t('notifications.coverUpdated', '封面已更新'));
+  };
+
   const isAllSelected = cards.length > 0 && selectedCardIds.length === cards.length;
 
   return (
@@ -471,6 +633,23 @@ export const CardList: React.FC = () => {
           <Book className="w-4 h-4" />
           <span>{showCover ? t('cardList.hideCover', '隐藏封面') : t('cardList.showCover', '显示封面')}</span>
         </Button>
+
+        {/* 生成封面按钮 */}
+        {showCover && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateCover}
+              disabled={generatingCover || cards.length === 0 || !isConnected}
+              className="flex items-center gap-1"
+              title={t('cardList.generateCover', '生成封面')}
+            >
+              <RefreshCw className={`w-4 h-4 ${generatingCover ? 'animate-spin' : ''}`} />
+              <span>{generatingCover ? t('cardList.generatingCover', '生成中...') : t('cardList.generateCover', '生成封面')}</span>
+            </Button>
+          </>
+        )}
 
         {/* 导出全部按钮 */}
         <Button
@@ -532,8 +711,11 @@ export const CardList: React.FC = () => {
         {showCover && (
           <div className="flex">
             <CoverCard 
-              title="知识卡片集" 
-              subtitle="提取关键知识，构建个人知识库"
+              title={coverInfo.title}
+              subtitle={coverInfo.subtitle}
+              quote={coverInfo.quote}
+              onEdit={handleEditCover}
+              onRefresh={handleGenerateCover}
             />
           </div>
         )}
@@ -576,6 +758,14 @@ export const CardList: React.FC = () => {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDeleteSelected}
         count={selectedCardIds.length}
+      />
+
+      {/* 编辑封面模态框 */}
+      <EditCoverModal
+        isOpen={isEditCoverModalOpen}
+        onClose={() => setIsEditCoverModalOpen(false)}
+        coverInfo={coverInfo}
+        onSave={handleSaveCoverInfo}
       />
     </div>
   );

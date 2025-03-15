@@ -16,6 +16,12 @@ export interface APIConfig {
   maxTokens: number;
 }
 
+export interface CoverInfo {
+  title: string;
+  subtitle: string;
+  quote: string;
+}
+
 export interface AppState {
   darkMode: boolean;
   toggleDarkMode: () => void;
@@ -31,4 +37,6 @@ export interface AppState {
   showNumbering: boolean;
   toggleNumbering: () => void;
   updateCardTitles: () => void;
+  coverInfo: CoverInfo;
+  setCoverInfo: (info: CoverInfo) => void;
 }

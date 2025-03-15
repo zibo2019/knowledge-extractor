@@ -18,7 +18,6 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
   const handleSubmit = () => {
     if (text.trim()) {
       onSubmit(text, cardCount);
-      setText('');
     }
   };
 

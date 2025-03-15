@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState, KnowledgeCard } from '../types';
+import { AppState, KnowledgeCard, CoverInfo } from '../types';
 
 export const useStore = create<AppState>((set, get) => ({
   darkMode: false,
@@ -57,5 +57,11 @@ export const useStore = create<AppState>((set, get) => ({
     });
     
     set({ cards: updatedCards });
-  }
+  },
+  coverInfo: {
+    title: '知识卡片集',
+    subtitle: '提取关键知识，构建个人知识库',
+    quote: '知识是人类进步的阶梯'
+  },
+  setCoverInfo: (info: CoverInfo) => set({ coverInfo: info })
 }));
